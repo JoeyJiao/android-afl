@@ -215,7 +215,7 @@ wrap_things_up:
 
 /* Process input file, generate modified_file. Insert instrumentation in all
    the appropriate places. */
-
+   
 static void add_instrumentation_arm(void)
 {
   static u8 line[MAX_LINE];
@@ -319,6 +319,7 @@ static void add_instrumentation_arm(void)
              inst_ratio);
   }
 }
+
 
 static void add_instrumentation(void) {
 
@@ -632,14 +633,7 @@ int main(int argc, char** argv) {
     inst_ratio /= 3;
   }
 
-  if (!just_version) {
-    if (getenv("AFL_USE_ARM")) {
-      add_instrumentation_arm();
-    }
-    else {
-      add_instrumentation();
-    }
-  }
+  if (!just_version) add_instrumentation();
 
   if (!(pid = fork())) {
 

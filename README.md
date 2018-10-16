@@ -1,5 +1,7 @@
 # android-afl
 
+> update afl to newest version(2.52b) and add support for Android P
+
 Fuzzing Android program with [american fuzzy lop (AFL)][american-fuzzy-lop]
 
 ## android-afl: Android-enabled version of AFL

@@ -12,6 +12,7 @@ MISC_PATH = $(PREFIX)/share/afl
 common_CFLAGS ?= -O3 -funroll-loops
 common_CFLAGS += -Wall -g -Wno-pointer-sign -Wno-pointer-arith \
 	-Wno-sign-compare -Wno-unused-parameter \
+	-Wno-unused-function -Wno-format -Wno-user-defined-warnings \
 	-DAFL_PATH=\"$(HELPER_PATH)\" -DDOC_PATH=\"$(DOC_PATH)\" \
 	-DBIN_PATH=\"$(BIN_PATH)\"
 
