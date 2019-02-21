@@ -10,7 +10,8 @@ int main()
 
   memset(buf, 0, 5);
 
-  read(0, buf, 5);
+  if (!read(0, buf, 5))
+    printf("read error\n");
 
   if (buf[0] == 'c')
     if (buf[1] == 'r')
