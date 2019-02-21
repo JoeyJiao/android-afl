@@ -1,18 +1,26 @@
 LOCAL_PATH := $(call my-dir)
 
+#export TARGET_TOOLCHAIN_PREFIX := ./prebuilts/clang/host/linux-x86/clang-4691093/bin/
+#export HOST_TOOLCHAIN_PREFIX := ./prebuilts/clang/host/linux-x86/clang-4691093/bin/
+
 include $(CLEAR_VARS)
 
+#LOCAL_SRC_FILES := crash.c
+#LOCAL_MODULE := crash
+#include $(BUILD_EXECUTABLE)
+#include $(CLEAR_VARS)
+
 LOCAL_SRC_FILES := crash.c
-LOCAL_MODULE := crash
+LOCAL_MODULE := afl-crash
 
 # test afl-gcc/afl-g++ on ARM/Android
 # to build: TEST_GCC_ARM=true mm
 ifeq ($(TEST_GCC_ARM), true)
 export AFL_CC := $(TARGET_CC)
 # expoet AFL_CXX := $(TARGET_CXX)
-export AFL_AS := $(TARGET_TOOLS_PREFIX)as
+export AFL_AS := $(TARGET_TOOLCHAIN_PREFIX)as
 LOCAL_CLANG := false
-LOCAL_CC :=$(LOCAL_PATH)/../afl-gcc
+LOCAL_CC := afl-gcc
 # LOCAL_CXX := afl-g++
 include $(BUILD_EXECUTABLE)
 endif
@@ -24,20 +32,23 @@ export AFL_CC=$(HOST_CC)
 # export AFL_CXX=$(HOST_CXX)
 LOCAL_MULTILIB := 32
 export AFL_AS=$(HOST_TOOLCHAIN_PREFIX)as
-LOCAL_CLANG := false
-LOCAL_CC :=$(LOCAL_PATH)/../afl-gcc
+LOCAL_CLANG := true
+LOCAL_CC := afl-gcc
 # LOCAL_CXX := afl-g++
 include $(BUILD_HOST_EXECUTABLE)
 endif
 
 # test afl-clang/afl-clang++ on ARM/Android
-# to build:  AFL_USE_ARM=true TEST_CLANG_ARM=true mm 
+# to build: TEST_CLANG_ARM=true mm
 ifeq ($(TEST_CLANG_ARM), true)
 export AFL_CC=$(CLANG)
-# export AFL_CXX=$(CLANG_CXX)
-export AFL_AS=$(TARGET_TOOLS_PREFIX)as
+#export AFL_CXX=$(CLANG_CXX)
+export AFL_AS=prebuilts/gcc/linux-x86/x86/x86_64-linux-android-4.9/x86_64-linux-android/bin/as
+#export AFL_AS=prebuilts/gcc/linux-x86/aarch64/aarch64-linux-android-4.9/aarch64-linux-android/bin/as
 LOCAL_CLANG := true
-LOCAL_CC :=$(LOCAL_PATH)/../afl-clang
+LOCAL_CC := afl-clang
+LOCAL_FORCE_STATIC_EXECUTABLE := true
+#LOCAL_CFLAGS := -static -g -v
 # LOCAL_CC := afl-clang++
 include $(BUILD_EXECUTABLE)
 endif
@@ -47,9 +58,10 @@ endif
 ifeq ($(TEST_CLANG_HOST), true)
 export AFL_CC=$(CLANG)
 # export AFL_CXX=$(CLANG_CXX)
-export AFL_AS=$(HOST_TOOLCHAIN_PREFIX)as
+export AFL_AS=prebuilts/gcc/linux-x86/x86/x86_64-linux-android-4.9/x86_64-linux-android/bin/as
 LOCAL_CLANG := true
-LOCAL_CC := $(LOCAL_PATH)/../afl-clang
+LOCAL_FORCE_STATIC_EXECUTABLE := true
+LOCAL_CC := afl-clang
 # LOCAL_CXX := afl-clang++
 include $(BUILD_HOST_EXECUTABLE)
 endif
@@ -57,19 +69,16 @@ endif
 # test afl-clang-fast/afl-clang-fast++ on ARM/Android
 # to build: TEST_CLANG_FAST_ARM=true mm -B
 ifeq ($(TEST_CLANG_FAST_ARM), true)
-export AFL_CC=/usr/bin/clang-3.8
-# export AFL_CXX=/usr/bin/clang++-3.8
-LOCAL_CLANG := true
-LOCAL_CC := afl-clang-fast
 # LOCAL_CXX := afl-clang-fast++
-LOCAL_LDFLAGS := $(HOST_OUT)/afl/afl-llvm-rt.o
+#LOCAL_LDFLAGS := $(HOST_OUT)/afl/afl-llvm-rt.o
+include android-afl/android-test/afl.mk
 include $(BUILD_EXECUTABLE)
 endif
 
 # test afl-clang-fast/afl-clang-fast++ on aarch64/Android
 # to build: TEST_CLANG_FAST_AARCH64=true mm -B
 ifeq ($(TEST_CLANG_FAST_AARCH64), true)
-export AFL_CC=/usr/bin/clang-3.8
+export AFL_CC=/usr/bin/clang
 # export AFL_CXX=/usr/bin/clang++-3.8
 LOCAL_MULTILIB := 64
 LOCAL_CLANG := true
@@ -82,7 +91,7 @@ endif
 # test afl-clang-fast/afl-clang-fast++ on 64bit host
 # to build: TEST_CLANG_FAST_HOST=true mm -B
 ifeq ($(TEST_CLANG_FAST_HOST), true)
-export AFL_CC=/usr/bin/clang-3.8
+export AFL_CC=/usr/bin/clang
 # export AFL_CXX=/usr/bin/clang++-3.8
 LOCAL_MULTILIB := 64
 LOCAL_CLANG := true
@@ -95,7 +104,7 @@ endif
 # test afl-clang-fast/afl-clang-fast++ on 32bit host
 # to build: TEST_CLANG_FAST_HOST_32=true mm -B
 ifeq ($(TEST_CLANG_FAST_HOST_32), true)
-export AFL_CC=/usr/bin/clang-3.8
+export AFL_CC=/usr/bin/clang
 # export AFL_CXX=/usr/bin/clang++-3.8
 LOCAL_MULTILIB := 32
 LOCAL_CLANG := true

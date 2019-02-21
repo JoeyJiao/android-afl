@@ -141,16 +141,18 @@ include $(BUILD_HOST_EXECUTABLE)
 #################################afl-llvm-pass.so#################################
 
 include $(CLEAR_VARS)
+LLVM_CONFIG := $(dir $(CLANG))/llvm-config
+LLVM_CONFIG_CXXFLAGS := $(shell $(LLVM_CONFIG) --cxxflags)
+LLVM_CONFIG_LDFLAGS := $(shell $(LLVM_CONFIG) --ldflags)
 
-LLVM_CONFIG := llvm-config
-CLANG_CFL := `$(LLVM_CONFIG) --cxxflags` -fno-rtti -fpic -O3 -funroll-loops -Wall -g -Wno-variadic-macros -Wno-unknown-warning-option
-CLANG_LFL := $(LDFLAGS) `$(LLVM_CONFIG) --ldflags` 
-HOST_CLANG_CXX := clang++
+LOCAL_SRC_FILES := llvm_mode/afl-llvm-pass.cpp
+LOCAL_CPPFLAGS := $(LLVM_CONFIG_CXXFLAGS) -fno-rtti -fpic $(common_CFLAGS) -Wno-variadic-macros
 
-$(info Generating afl-llvm-pass.so)
-$(shell mkdir -p $(HELPER_PATH))
-$(shell ($(HOST_CLANG_CXX) $(CLANG_CFL) -shared $(LOCAL_PATH)/llvm_mode/afl-llvm-pass.so.cc -o $(HELPER_PATH)/afl-llvm-pass.so $(CLANG_LFL)))
-
+LOCAL_MULTILIB := 64
+LOCAL_ALLOW_UNDEFINED_SYMBOLS := true
+LOCAL_MODULE := afl-llvm-pass
+LOCAL_POST_INSTALL_CMD := $(hide) cp -f $(HOST_OUT)/lib64/afl-llvm-pass.so $(HELPER_PATH)/afl-llvm-pass.so;
+include $(BUILD_HOST_SHARED_LIBRARY)
 
 ################################afl-llvm-rt#################################
 
@@ -159,14 +161,14 @@ include $(CLEAR_VARS)
 LOCAL_SRC_FILES := llvm_mode/afl-llvm-rt.o.c
 LOCAL_CLANG := true
 LOCAL_MULTILIB := both
-LOCAL_CC := /usr/bin/clang
 LOCAL_CFLAGS := $(common_CFLAGS)
 LOCAL_MODULE := afl-llvm-rt
 ifeq ($(TARGET_2ND_ARCH),)
-LOCAL_POST_INSTALL_CMD := $(hide) cp -f $(TARGET_OUT_INTERMEDIATES)/SHARED_LIBRARIES/afl-llvm-rt_intermediates/llvm_mode/afl-llvm-rt.o.o $(HELPER_PATH)/afl-llvm-rt.o;
+LOCAL_POST_INSTALL_CMD := $(hide) cp -f $(TARGET_OUT_INTERMEDIATES)/SHARED_LIBRARIES/afl-llvm-rt_intermediates/llvm_mode/afl-llvm-rt.o.o $(HELPER_PATH)/afl-llvm-rt-target.o;
 else
-LOCAL_POST_INSTALL_CMD := $(hide) cp -f $(TARGET_OUT_INTERMEDIATES)/SHARED_LIBRARIES/afl-llvm-rt_intermediates/llvm_mode/afl-llvm-rt.o.o $(HELPER_PATH)/afl-llvm-rt-64.o; \
-	cp -f $(TARGET_OUT_INTERMEDIATES)_$(TARGET_2ND_ARCH)/SHARED_LIBRARIES/afl-llvm-rt_intermediates/llvm_mode/afl-llvm-rt.o.o $(HELPER_PATH)/afl-llvm-rt.o;
+LOCAL_POST_INSTALL_CMD := $(hide) cp -f $(TARGET_OUT_INTERMEDIATES)/SHARED_LIBRARIES/afl-llvm-rt_intermediates/llvm_mode/afl-llvm-rt.o.o $(HELPER_PATH)/afl-llvm-rt-target-64.o; \
+	cp -f $(TARGET_OUT_INTERMEDIATES)_$(TARGET_2ND_ARCH)/SHARED_LIBRARIES/afl-llvm-rt_intermediates/llvm_mode/afl-llvm-rt.o.o $(HELPER_PATH)/afl-llvm-rt-target.o; \
+	cp $(HELPER_PATH)/afl-llvm-rt-target-64.o $(HELPER_PATH)/afl-llvm-rt.o
 endif
 include $(BUILD_SHARED_LIBRARY)
 
