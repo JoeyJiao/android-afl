@@ -141,11 +141,13 @@ include $(BUILD_HOST_EXECUTABLE)
 #################################afl-llvm-pass.so#################################
 
 include $(CLEAR_VARS)
-LLVM_CONFIG := $(dir $(CLANG))/llvm-config
+#LLVM_CONFIG := $(dir $(CLANG))/llvm-config
+LLVM_CONFIG := llvm-config
 LLVM_CONFIG_CXXFLAGS := $(shell $(LLVM_CONFIG) --cxxflags)
 LLVM_CONFIG_LDFLAGS := $(shell $(LLVM_CONFIG) --ldflags)
 
 LOCAL_SRC_FILES := llvm_mode/afl-llvm-pass.cpp
+LOCAL_C_INCLUDES += $(shell dirname $(dir $(CLANG)))/include
 LOCAL_CPPFLAGS := $(LLVM_CONFIG_CXXFLAGS) -fno-rtti -fpic $(common_CFLAGS) -Wno-variadic-macros
 
 LOCAL_MULTILIB := 64
