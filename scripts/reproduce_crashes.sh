@@ -38,7 +38,7 @@ done
 shift $((OPTIND-1))
 
 if [ "$SERIAL_NUMBER" != "" ]; then
-	adb -s $SERIAL_NUMBER shell su "echo 0 > /proc/sys/kernel/randomize_va_space"
+	adb -s $SERIAL_NUMBER shell su root "echo 0 > /proc/sys/kernel/randomize_va_space"
 	adb -s $SERIAL_NUMBER shell su root "rm -rf $ANDROID_DATA_TMP/$(basename $INPUT)"
 	adb -s $SERIAL_NUMBER shell mkdir $ANDROID_DATA_TMP/$(basename $INPUT)
 	adb -s $SERIAL_NUMBER push $INPUT $ANDROID_DATA_TMP
