@@ -31,6 +31,8 @@ def parse(log):
     fd = open(TMP_LOG, 'w+')
     output = []
     for line in lines:
+        if line.startswith('==== ') and line.endswith(' ====\n'):
+            output = [line]
         if descr is not None:
             if line.startswith('Exploitability Classification: '):
                 class_ = line[31:].replace('\n', '')
@@ -54,9 +56,17 @@ def parse(log):
                 backtrace(line[6:], stack)
     fd.close()
 
-    for line in set(open(TMP_LOG).readlines()):
-        line = json.loads(line)
-        print('\n'.join(line))
+    fd = open(TMP_LOG)
+    lines = fd.readlines()
+    fd.close()
+    uniq_lines = set(['\n'.join(json.loads(x)[1:]) for x in lines])
+    for u_line in uniq_lines:
+        for line in lines:
+            line = '\n'.join(json.loads(line))
+            if u_line in line:
+                print(line)
+                print('\n')
+                break
 
     os.remove(TMP_LOG)
 
