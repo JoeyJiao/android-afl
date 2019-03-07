@@ -54,9 +54,9 @@ mkdir -p $OUT
 
 if [[ $JOBS -gt 1 ]]; then
 	for i in $(seq 1 $(expr $JOBS - 1)); do
-		exec $FUZZ -i $INPUT -o $OUT -m $MEMORY -t $TIMEOUT -S s$i $BINARY > $OUT/log-s$i &
+		exec $FUZZ -i $INPUT -o $OUT -m $MEMORY -t $TIMEOUT -S s$i -- $BINARY @@ > $OUT/log-s$i &
 	done
-	exec $FUZZ -i $INPUT -o $OUT -m $MEMORY -t $TIMEOUT -M master $BINARY
+	exec $FUZZ -i $INPUT -o $OUT -m $MEMORY -t $TIMEOUT -M master -- $BINARY @@
 else
-	exec $FUZZ -i $INPUT -o $OUT -m $MEMORY -t $TIMEOUT $BINARY
+	exec $FUZZ -i $INPUT -o $OUT -m $MEMORY -t $TIMEOUT -- $BINARY @@
 fi
