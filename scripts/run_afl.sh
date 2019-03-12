@@ -51,6 +51,7 @@ if [ "$BINARY" == "" ]; then
 fi
 
 mkdir -p $OUT
+chmod a+xr findings
 
 if [[ $JOBS -gt 1 ]]; then
 	for i in $(seq 1 $(expr $JOBS - 1)); do
