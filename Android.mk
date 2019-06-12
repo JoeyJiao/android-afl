@@ -169,9 +169,11 @@ LOCAL_MULTILIB := both
 LOCAL_CFLAGS := $(common_CFLAGS)
 LOCAL_MODULE := afl-llvm-rt
 ifeq ($(TARGET_2ND_ARCH),)
-LOCAL_POST_INSTALL_CMD := $(hide) cp -f $(TARGET_OUT_INTERMEDIATES)/SHARED_LIBRARIES/afl-llvm-rt_intermediates/llvm_mode/afl-llvm-rt.o.o $(HELPER_PATH)/afl-llvm-rt-32.o;
+LOCAL_POST_INSTALL_CMD := $(hide) mkdir -p $(HELPER_PATH); \
+	$(hide) cp -f $(TARGET_OUT_INTERMEDIATES)/SHARED_LIBRARIES/afl-llvm-rt_intermediates/llvm_mode/afl-llvm-rt.o.o $(HELPER_PATH)/afl-llvm-rt-32.o;
 else
-LOCAL_POST_INSTALL_CMD := $(hide) cp -f $(TARGET_OUT_INTERMEDIATES)/SHARED_LIBRARIES/afl-llvm-rt_intermediates/llvm_mode/afl-llvm-rt.o.o $(HELPER_PATH)/afl-llvm-rt-64.o; \
+LOCAL_POST_INSTALL_CMD := $(hide) mkdir -p $(HELPER_PATH); \
+	$(hide) cp -f $(TARGET_OUT_INTERMEDIATES)/SHARED_LIBRARIES/afl-llvm-rt_intermediates/llvm_mode/afl-llvm-rt.o.o $(HELPER_PATH)/afl-llvm-rt-64.o; \
 	cp -f $(TARGET_OUT_INTERMEDIATES)_$(TARGET_2ND_ARCH)/SHARED_LIBRARIES/afl-llvm-rt_intermediates/llvm_mode/afl-llvm-rt.o.o $(HELPER_PATH)/afl-llvm-rt-32.o; \
 	cp -f $(TARGET_OUT_INTERMEDIATES)/SHARED_LIBRARIES/afl-llvm-rt_intermediates/llvm_mode/afl-llvm-rt.o.o $(HELPER_PATH)/afl-llvm-rt.o;
 endif
