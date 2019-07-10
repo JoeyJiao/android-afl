@@ -101,8 +101,7 @@ bool AFLCoverage::runOnModule(Module &M) {
                          GlobalValue::ExternalLinkage, 0, "__afl_area_ptr");
 
   GlobalVariable *AFLPrevLoc = new GlobalVariable(
-      M, Int32Ty, false, GlobalValue::ExternalLinkage, 0, "__afl_prev_loc",
-      0, GlobalVariable::GeneralDynamicTLSModel, 0, false);
+      M, Int32Ty, false, GlobalValue::ExternalLinkage, 0, "__afl_prev_loc");
 
   /* Instrument all the things! */
 
