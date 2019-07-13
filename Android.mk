@@ -151,7 +151,11 @@ endif
 
 LOCAL_SRC_FILES := llvm_mode/afl-llvm-pass.cpp
 LOCAL_C_INCLUDES += $(shell dirname $(dir $(CLANG)))/include
+ifeq ($(AFL_TRACE_PC), true)
+LOCAL_CPPFLAGS := -fno-rtti -fpic $(common_CFLAGS) -Wno-variadic-macros
+else
 LOCAL_CPPFLAGS := $(LLVM_CONFIG_CXXFLAGS) -fno-rtti -fpic $(common_CFLAGS) -Wno-variadic-macros
+endif
 
 LOCAL_MULTILIB := 64
 LOCAL_ALLOW_UNDEFINED_SYMBOLS := true
