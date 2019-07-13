@@ -141,8 +141,11 @@ include $(BUILD_HOST_EXECUTABLE)
 #################################afl-llvm-pass.so#################################
 
 include $(CLEAR_VARS)
-#LLVM_CONFIG := $(dir $(CLANG))/llvm-config
+ifeq ($(USE_PREBUILT_LLVM_CONFIG), true)
+LLVM_CONFIG := $(dir $(CLANG))/llvm-config
+else
 LLVM_CONFIG := llvm-config
+endif
 LLVM_CONFIG_CXXFLAGS := $(shell $(LLVM_CONFIG) --cxxflags)
 LLVM_CONFIG_LDFLAGS := $(shell $(LLVM_CONFIG) --ldflags)
 
