@@ -14,6 +14,7 @@ if [ $# -lt 1 ]; then
 fi
 
 sudo apt install -y llvm-3.5
+#sudo ln -sf /usr/bin/llvm-config-3.5 /usr/bin/llvm-config
 git clone https://github.com/JoeyJiao/android-afl
 
 source build/envsetup.sh
@@ -25,8 +26,9 @@ cd -
 
 cd android-afl
 USE_PREBUILT_LLVM_CONFIG=true AFL_TRACE_PC=true mm -j${CORES}
-cd -
 
-TEST_CLANG_FAST_AARCH64=true make afl-crash
-mv android-afl/android-test/Android.bp.bak android-afl/android-test/Android.bp
-make afl-crash-bp
+cd android-test
+TEST_CLANG_FAST_AARCH64=true mm
+cd ../..
+mv android-afl/android-test-bp/Android.bp.bak android-afl/android-test-bp/Android.bp
+AFL_TRACE_PC=true make afl-crash-bp
