@@ -1,0 +1,13 @@
+cc_binary {
+  name: "afl-crash-bp",
+
+  srcs: [
+    "crash.c",
+  ],
+
+  cflags: [
+    "-AFL_MODE=1",
+  ],
+
+  clang: true,
+}
