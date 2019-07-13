@@ -143,7 +143,7 @@ include $(BUILD_HOST_EXECUTABLE)
 include $(CLEAR_VARS)
 LLVM_CONFIG := llvm-config
 ifeq ($(USE_PREBUILT_LLVM_CONFIG), true)
-LLVM_CONFIG_CXXFLAGS := -I/usr/lib/llvm-3.4/include  -DNDEBUG -D_GNU_SOURCE -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS -g -O2 -fomit-frame-pointer -fvisibility-inlines-hidden -fno-exceptions -fPIC -Woverloaded-virtual -Wcast-qual 
+LLVM_CONFIG_CXXFLAGS := -I/usr/lib/llvm-3.5/include  -DNDEBUG -D_GNU_SOURCE -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS -g -O2 -fomit-frame-pointer -fvisibility-inlines-hidden -fno-exceptions -fPIC -Woverloaded-virtual -Wcast-qual 
 else
 LLVM_CONFIG_CXXFLAGS := $(shell $(LLVM_CONFIG) --cxxflags)
 LLVM_CONFIG_LDFLAGS := $(shell $(LLVM_CONFIG) --ldflags)

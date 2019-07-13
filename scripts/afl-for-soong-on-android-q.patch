@@ -1,0 +1,79 @@
+diff --git a/apex/apex_test.go b/apex/apex_test.go
+index c771ae4..9bb03c9 100644
+--- a/apex/apex_test.go
++++ b/apex/apex_test.go
+@@ -474,8 +474,8 @@ func TestApexWithStubs(t *testing.T) {
+ 	ensureNotContains(t, mylibLdFlags, "mylib3/android_arm64_armv8-a_core_shared_12_myapex/mylib3.so")
+ 
+ 	// Ensure that stubs libs are built without -include flags
+-	mylib2Cflags := ctx.ModuleForTests("mylib2", "android_arm64_armv8-a_core_static_myapex").Rule("cc").Args["cFlags"]
+-	ensureNotContains(t, mylib2Cflags, "-include ")
++	//mylib2Cflags := ctx.ModuleForTests("mylib2", "android_arm64_armv8-a_core_static_myapex").Rule("cc").Args["cFlags"]
++	//ensureNotContains(t, mylib2Cflags, "-include ")
+ 
+ 	// Ensure that genstub is invoked with --apex
+ 	ensureContains(t, "--apex", ctx.ModuleForTests("mylib2", "android_arm64_armv8-a_core_static_3_myapex").Rule("genStubSrc").Args["flags"])
+diff --git a/cc/builder.go b/cc/builder.go
+index 71b5a95..9a97de4 100644
+--- a/cc/builder.go
++++ b/cc/builder.go
+@@ -20,6 +20,7 @@ package cc
+ 
+ import (
+ 	"fmt"
++	"os"
+ 	"path/filepath"
+ 	"runtime"
+ 	"strconv"
+@@ -423,6 +424,17 @@ func TransformSourceToObj(ctx android.ModuleContext, subdir string, srcFiles and
+ 		} else {
+ 			ccCmd = "${config.ClangBin}/" + ccCmd
+ 		}
++		if strings.Contains(cflags, "-AFL_MODE=1") {
++			if os.Getenv("HOST_OUT") == "" {
++				os.Setenv("HOST_OUT", "out/host/linux-x86")
++			}
++			if strings.Contains(ccCmd, "clang++") {
++				ccCmd = "afl-clang-fast++"
++			} else {
++				ccCmd = "afl-clang-fast"
++			}
++			ccCmd = os.Getenv("HOST_OUT") + "/bin/" + ccCmd
++		}
+ 
+ 		var implicitOutputs android.WritablePaths
+ 		if coverage {
+@@ -612,6 +624,13 @@ func TransformObjToDynamicBinary(ctx android.ModuleContext,
+ 	} else {
+ 		ldCmd = "${config.ClangBin}/clang++"
+ 	}
++	if strings.Contains(flags.cFlags, "-AFL_MODE=1") {
++		if strings.Contains(flags.cFlags, "-target i686-linux-android") {
++			flags.ldFlags = flags.ldFlags + " " + os.Getenv("HOST_OUT") + "/afl/afl-llvm-rt-32.o"
++		} else {
++			flags.ldFlags = flags.ldFlags + " " + os.Getenv("HOST_OUT") + "/afl/afl-llvm-rt.o"
++		}
++	}
+ 
+ 	var libFlagsList []string
+ 
+diff --git a/cc/cc.go b/cc/cc.go
+index a0b4117..6541681 100644
+--- a/cc/cc.go
++++ b/cc/cc.go
+@@ -973,11 +973,11 @@ func (c *Module) GenerateAndroidBuildActions(actx android.ModuleContext) {
+ 	}
+ 	// Optimization to reduce size of build.ninja
+ 	// Replace the long list of flags for each file with a module-local variable
+-	ctx.Variable(pctx, "cflags", strings.Join(flags.CFlags, " "))
+-	ctx.Variable(pctx, "cppflags", strings.Join(flags.CppFlags, " "))
++	//ctx.Variable(pctx, "cflags", strings.Join(flags.CFlags, " "))
++	//ctx.Variable(pctx, "cppflags", strings.Join(flags.CppFlags, " "))
+ 	ctx.Variable(pctx, "asflags", strings.Join(flags.AsFlags, " "))
+-	flags.CFlags = []string{"$cflags"}
+-	flags.CppFlags = []string{"$cppflags"}
++	//flags.CFlags = []string{"$cflags"}
++	//flags.CppFlags = []string{"$cppflags"}
+ 	flags.AsFlags = []string{"$asflags"}
+ 
+ 	var objs Objects
