@@ -19,14 +19,19 @@ source build/envsetup.sh
 lunch
 
 cd build/soong
-git apply android-afl/script/afl-for-soong-on-android-q.patch
+git apply ../../android-afl/script/afl-for-soong-on-android-q.patch
 cd -
 
+export AFL_CC="vendor/qcom/proprietary/llvm-arm-toolchain-ship/8.0/bin/clang"
+export AFL_CXX="vendor/qcom/proprietary/llvm-arm-toolchain-ship/8.0/bin/clang++"
+export AFL_PATH="out/host/linux-x86/afl"
+export AFL_TRACE_PC=true
+
 cd android-afl
-AFL_TRACE_PC=true mm -j${CORES}
+mm -j${CORES}
 
 cd android-test
 TEST_CLANG_FAST_AARCH64=true mm
 cd ../..
 mv android-afl/android-test-bp/Android.bp.bak android-afl/android-test-bp/Android.bp
-AFL_TRACE_PC=true make afl-crash-bp
+make afl-crash-bp
