@@ -17,8 +17,8 @@ USAGE:
       memory limit, default 50MB
     -t
       timeout, default 50ms
-                -x
-                        dict
+    -x
+      dict
     -h
       this help message
 EOF
