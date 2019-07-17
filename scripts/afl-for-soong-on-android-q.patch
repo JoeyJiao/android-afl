@@ -1,8 +1,8 @@
 diff --git a/apex/apex_test.go b/apex/apex_test.go
-index c771ae4..9bb03c9 100644
+index a07a89b..7aaa7ff 100644
 --- a/apex/apex_test.go
 +++ b/apex/apex_test.go
-@@ -474,8 +474,8 @@ func TestApexWithStubs(t *testing.T) {
+@@ -481,8 +481,8 @@ func TestApexWithStubs(t *testing.T) {
  	ensureNotContains(t, mylibLdFlags, "mylib3/android_arm64_armv8-a_core_shared_12_myapex/mylib3.so")
  
  	// Ensure that stubs libs are built without -include flags
@@ -14,7 +14,7 @@ index c771ae4..9bb03c9 100644
  	// Ensure that genstub is invoked with --apex
  	ensureContains(t, "--apex", ctx.ModuleForTests("mylib2", "android_arm64_armv8-a_core_static_3_myapex").Rule("genStubSrc").Args["flags"])
 diff --git a/cc/builder.go b/cc/builder.go
-index 71b5a95..9a97de4 100644
+index ebc5fcd..ef987be 100644
 --- a/cc/builder.go
 +++ b/cc/builder.go
 @@ -20,6 +20,7 @@ package cc
@@ -25,7 +25,7 @@ index 71b5a95..9a97de4 100644
  	"path/filepath"
  	"runtime"
  	"strconv"
-@@ -423,6 +424,17 @@ func TransformSourceToObj(ctx android.ModuleContext, subdir string, srcFiles and
+@@ -437,6 +438,17 @@ func TransformSourceToObj(ctx android.ModuleContext, subdir string, srcFiles and
  		} else {
  			ccCmd = "${config.ClangBin}/" + ccCmd
  		}
@@ -43,12 +43,12 @@ index 71b5a95..9a97de4 100644
  
  		var implicitOutputs android.WritablePaths
  		if coverage {
-@@ -612,6 +624,13 @@ func TransformObjToDynamicBinary(ctx android.ModuleContext,
+@@ -626,6 +638,13 @@ func TransformObjToDynamicBinary(ctx android.ModuleContext,
  	} else {
  		ldCmd = "${config.ClangBin}/clang++"
  	}
 +	if strings.Contains(flags.cFlags, "-AFL_MODE=1") {
-+		if strings.Contains(flags.cFlags, "-target i686-linux-android") {
++		if strings.Contains(flags.cFlags, "-target i686-linux-android") || strings.Contains(flags.cFlags, "-target armv7a-linux-androideabi") {
 +			flags.ldFlags = flags.ldFlags + " " + os.Getenv("HOST_OUT") + "/afl/afl-llvm-rt-32.o"
 +		} else {
 +			flags.ldFlags = flags.ldFlags + " " + os.Getenv("HOST_OUT") + "/afl/afl-llvm-rt.o"
