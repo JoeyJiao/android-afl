@@ -186,6 +186,16 @@ include $(BUILD_SHARED_LIBRARY)
 include $(CLEAR_VARS)
 
 LOCAL_SRC_FILES := llvm_mode/afl-llvm-rt.o.c
+LOCAL_CLANG := true
+LOCAL_MULTILIB := both
+LOCAL_CFLAGS := $(common_CFLAGS)
+LOCAL_MODULE := afl-llvm-rt.vendor
+LOCAL_PROPRIETARY_MODULE := true
+include $(BUILD_SHARED_LIBRARY)
+
+include $(CLEAR_VARS)
+
+LOCAL_SRC_FILES := llvm_mode/afl-llvm-rt.o.c
 LOCAL_CFLAGS := $(common_CFLAGS)
 LOCAL_MULTILIB := 64
 LOCAL_MODULE := afl-llvm-rt
