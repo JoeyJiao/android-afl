@@ -31,7 +31,7 @@ JOBS=1
 MEMORY=50
 TIMEOUT=50
 INPUT=cases
-timestamp=$(date +%Y%m%d-%H%M%S)
+timestamp=$(date +%Y%m%d)
 OUT="findings/$timestamp"
 
 while getopts "hf:b:j:m:t:x:i:" o; do
