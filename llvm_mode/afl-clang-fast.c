@@ -140,7 +140,7 @@ static void edit_params(u32 argc, char** argv) {
     u8* cur = *(++argv);
 
     if (!strcmp(cur, "-m32")) bit_mode = 32;
-    if (!strcmp(cur, "-m64")) bit_mode = 64;
+//    if (!strcmp(cur, "-m64")) bit_mode = 64;
 
     if (!strcmp(cur, "-x")) x_set = 1;
 
@@ -152,7 +152,7 @@ static void edit_params(u32 argc, char** argv) {
 
     if (strstr(cur, "FORTIFY_SOURCE")) fortify_set = 1;
 
-    if (!strcmp(cur, "-shared")) maybe_linking = 0;
+//    if (!strcmp(cur, "-shared")) maybe_linking = 0;
 
     if (!strcmp(cur, "-Wl,-z,defs") ||
         !strcmp(cur, "-Wl,--no-undefined")) continue;
