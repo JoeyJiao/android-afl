@@ -35,7 +35,7 @@ JOBS=1
 MEMORY=50
 TIMEOUT=50
 INPUT=cases
-OUT="findings
+OUT="findings"
 
 while getopts "hf:b:j:m:t:x:i:o:" o; do
   case "$o" in
