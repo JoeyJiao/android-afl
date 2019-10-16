@@ -19,6 +19,10 @@ USAGE:
       timeout, default 50ms
     -x
       dict
+    -i
+      input
+    -o
+      output
     -h
       this help message
 EOF
@@ -31,10 +35,9 @@ JOBS=1
 MEMORY=50
 TIMEOUT=50
 INPUT=cases
-timestamp=$(date +%Y%m%d)
-OUT="findings/$timestamp"
+OUT="findings
 
-while getopts "hf:b:j:m:t:x:i:" o; do
+while getopts "hf:b:j:m:t:x:i:o:" o; do
   case "$o" in
     f) FUZZ="$OPTARG";;
     b) BINARY="$OPTARG";;
@@ -43,6 +46,7 @@ while getopts "hf:b:j:m:t:x:i:" o; do
     t) TIMEOUT="$OPTARG";;
     i) INPUT="$OPTARG";;
     x) DICT="$OPTARG";;
+    o) OUT="$OPTARG";;
     h) Usage;;
   esac
 done
@@ -54,7 +58,7 @@ if [ "$BINARY" == "" ]; then
 fi
 
 mkdir -p $OUT
-chmod a+xr findings
+chmod a+xr $OUT
 
 if [[ $JOBS -gt 1 ]]; then
   for i in $(seq 1 $(expr $JOBS - 1)); do
