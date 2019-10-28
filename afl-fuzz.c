@@ -7605,6 +7605,8 @@ EXP_ST void setup_signal_handlers(void) {
   sa.sa_handler = SIG_IGN;
   sigaction(SIGTSTP, &sa, NULL);
   sigaction(SIGPIPE, &sa, NULL);
+  if (getenv("AFL_IGNORE_SIGABRT"))
+    sigaction(SIGABRT, &sa, NULL);
 
 }
 
