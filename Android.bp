@@ -1,0 +1,30 @@
+cc_defaults {
+  name: "afl-defaults",
+
+  cflags: [
+    "-funroll-loops",
+    "-Wno-pointer-sign",
+    "-Wno-pointer-arith",
+    "-Wno-sign-compare",
+    "-Wno-unused-parameter",
+    "-Wno-unused-function",
+    "-Wno-format",
+    "-Wno-user-defined-warnings",
+    "-DUSE_TRACE_PC=1",
+    "-DBIN_PATH=\"out/host/linux-x86/bin\"",
+    "-DDOC_PATH=\"out/host/linux-x86/shared/doc/afl\"",
+  ],
+}
+
+cc_binary {
+  name: "afl-fuzz-static",
+  static_executable: true,
+
+  defaults: [
+    "afl-defaults",
+  ],
+
+  srcs: [
+    "afl-fuzz.c",
+  ],
+}
