@@ -13,11 +13,12 @@ cc_defaults {
     "-DUSE_TRACE_PC=1",
     "-DBIN_PATH=\"out/host/linux-x86/bin\"",
     "-DDOC_PATH=\"out/host/linux-x86/shared/doc/afl\"",
+    "-D__USE_GNU",
   ],
 }
 
 cc_binary {
-  name: "afl-fuzz-static",
+  name: "afl-fuzz",
   static_executable: true,
 
   defaults: [
@@ -26,5 +27,7 @@ cc_binary {
 
   srcs: [
     "afl-fuzz.c",
+    "smart-chunks.c",
+    "smart-utils.c",
   ],
 }

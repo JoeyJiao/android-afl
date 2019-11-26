@@ -4,7 +4,7 @@
 #
 # Written and maintained by Michal Zalewski <lcamtuf@google.com>
 # 
-# Copyright 2013, 2014, 2015, 2016, 2017 Google Inc. All rights reserved.
+# Copyright 2013, 2014, 2015, 2016, 2017 Google LLC All rights reserved.
 # 
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -24,13 +24,15 @@ MISC_PATH   = $(PREFIX)/share/afl
 
 # PROGS intentionally omit afl-as, which gets installed elsewhere.
 
-PROGS       = afl-gcc afl-fuzz afl-showmap afl-tmin afl-gotcpu afl-analyze
+PROGS       = afl-gcc afl-fuzz afl-showmap afl-tmin afl-gotcpu afl-analyze test-chunks
 SH_PROGS    = afl-plot afl-cmin afl-whatsup
 
 CFLAGS     ?= -O3 -funroll-loops
 CFLAGS     += -Wall -D_FORTIFY_SOURCE=2 -g -Wno-pointer-sign \
 	      -DAFL_PATH=\"$(HELPER_PATH)\" -DDOC_PATH=\"$(DOC_PATH)\" \
 	      -DBIN_PATH=\"$(BIN_PATH)\"
+
+LDFLAGS    += -lm
 
 ifneq "$(filter Linux GNU%,$(shell uname))" ""
   LDFLAGS  += -ldl
@@ -69,8 +71,8 @@ afl-as: afl-as.c afl-as.h $(COMM_HDR) | test_x86
 	$(CC) $(CFLAGS) $@.c -o $@ $(LDFLAGS)
 	ln -sf afl-as as
 
-afl-fuzz: afl-fuzz.c $(COMM_HDR) | test_x86
-	$(CC) $(CFLAGS) $@.c -o $@ $(LDFLAGS)
+afl-fuzz: afl-fuzz.c $(COMM_HDR) smart-chunks.o smart-chunks.h smart-utils.o smart-utils.h | test_x86
+	$(CC) $(CFLAGS) $@.c smart-chunks.o smart-utils.o -o $@ $(LDFLAGS)
 
 afl-showmap: afl-showmap.c $(COMM_HDR) | test_x86
 	$(CC) $(CFLAGS) $@.c -o $@ $(LDFLAGS)
@@ -84,12 +86,15 @@ afl-analyze: afl-analyze.c $(COMM_HDR) | test_x86
 afl-gotcpu: afl-gotcpu.c $(COMM_HDR) | test_x86
 	$(CC) $(CFLAGS) $@.c -o $@ $(LDFLAGS)
 
+test-chunks: test-chunks.c smart-chunks.o smart-chunks.h smart-utils.o smart-utils.h | test_x86
+	$(CC) $(CFLAGS) $@.c smart-chunks.o smart-utils.o -o $@ $(LDFLAGS)
+
 ifndef AFL_NO_X86
 
 test_build: afl-gcc afl-as afl-showmap
 	@echo "[*] Testing the CC wrapper and instrumentation output..."
 	unset AFL_USE_ASAN AFL_USE_MSAN; AFL_QUIET=1 AFL_INST_RATIO=100 AFL_PATH=. ./$(TEST_CC) $(CFLAGS) test-instr.c -o test-instr $(LDFLAGS)
-	echo 0 | ./afl-showmap -m none -q -o .test-instr0 ./test-instr
+	./afl-showmap -m none -q -o .test-instr0 ./test-instr < /dev/null
 	echo 1 | ./afl-showmap -m none -q -o .test-instr1 ./test-instr
 	@rm -f test-instr
 	@cmp -s .test-instr0 .test-instr1; DR="$$?"; rm -f .test-instr0 .test-instr1; if [ "$$DR" = "0" ]; then echo; echo "Oops, the instrumentation does not seem to be behaving correctly!"; echo; echo "Please ping <lcamtuf@google.com> to troubleshoot the issue."; echo; exit 1; fi
@@ -101,6 +106,15 @@ test_build: afl-gcc afl-as afl-showmap
 	@echo "[!] Note: skipping build tests (you may need to use LLVM or QEMU mode)."
 
 endif
+
+test_chunks: test-chunks
+	@TEST_CHUNKS_DIFF=`./test-chunks | diff - test-data/chunks/chunks.print` ; \
+	if [ "x$$TEST_CHUNKS_DIFF" = "x" ] ; then \
+		echo "[+] Data chunks routines in smart-chunks.c seems to be working!" ; \
+	else \
+		echo "Oops, error in testing smart-chunks routines" ; \
+		exit 1 ; \
+	fi
 
 all_done: test_build
 	@if [ ! "`which clang 2>/dev/null`" = "" ]; then echo "[+] LLVM users: see llvm_mode/README.llvm for a faster alternative to afl-gcc."; fi
@@ -138,7 +152,7 @@ endif
 	cp -r dictionaries/ $${DESTDIR}$(MISC_PATH)
 
 publish: clean
-	test "`basename $$PWD`" = "afl" || exit 1
+	test "`basename $$PWD`" = "AFL" || exit 1
 	test -f ~/www/afl/releases/$(PROGNAME)-$(VERSION).tgz; if [ "$$?" = "0" ]; then echo; echo "Change program version in config.h, mmkay?"; echo; exit 1; fi
 	cd ..; rm -rf $(PROGNAME)-$(VERSION); cp -pr $(PROGNAME) $(PROGNAME)-$(VERSION); \
 	  tar -cvz -f ~/www/afl/releases/$(PROGNAME)-$(VERSION).tgz $(PROGNAME)-$(VERSION)

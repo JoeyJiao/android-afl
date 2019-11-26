@@ -13,6 +13,7 @@ common_CFLAGS ?= -O0 -funroll-loops
 common_CFLAGS += -Wall -g -Wno-pointer-sign -Wno-pointer-arith \
 	-Wno-sign-compare -Wno-unused-parameter \
 	-Wno-unused-function -Wno-format -Wno-user-defined-warnings \
+	-D__USE_GNU \
 	-DAFL_PATH=\"$(HELPER_PATH)\" -DDOC_PATH=\"$(DOC_PATH)\" \
 	-DBIN_PATH=\"$(BIN_PATH)\"
 
@@ -20,7 +21,6 @@ ifdef AFL_TRACE_PC
   common_CFLAGS    += -DUSE_TRACE_PC=1
 endif
 
-#################################afl-gcc#################################
 
 include $(CLEAR_VARS)
 
@@ -35,7 +35,6 @@ LOCAL_MODULE := afl-gcc
 LOCAL_POST_INSTALL_CMD := $(hide) $(foreach t,$(ALL_TOOLS),ln -sf afl-gcc $(BIN_PATH)/$(t);)
 include $(BUILD_HOST_EXECUTABLE)
 
-#################################afl-as#################################
 
 include $(CLEAR_VARS)
 
@@ -46,26 +45,9 @@ LOCAL_MODULE_PATH := $(HELPER_PATH)
 LOCAL_POST_INSTALL_CMD := $(hide) ln -sf afl-as $(LOCAL_MODULE_PATH)/as;
 include $(BUILD_HOST_EXECUTABLE)
 
-#################################afl-fuzz#################################
 
 include $(CLEAR_VARS)
 
-LOCAL_SRC_FILES := afl-fuzz.c
-LOCAL_CFLAGS := $(common_CFLAGS)
-LOCAL_MODULE := afl-fuzz
-include $(BUILD_EXECUTABLE)
-
-include $(CLEAR_VARS)
-
-LOCAL_SRC_FILES := afl-fuzz.c
-LOCAL_CFLAGS := $(common_CFLAGS)
-LOCAL_LDLIBS := -ldl
-LOCAL_MODULE := afl-fuzz
-include $(BUILD_HOST_EXECUTABLE)
-
-include $(CLEAR_VARS)
-
-#################################afl-showmap#################################
 
 LOCAL_SRC_FILES := afl-showmap.c
 LOCAL_CFLAGS := $(common_CFLAGS)
@@ -79,7 +61,6 @@ LOCAL_CFLAGS := $(common_CFLAGS)
 LOCAL_MODULE := afl-showmap
 include $(BUILD_HOST_EXECUTABLE)
 
-#################################afl-tmin#################################
 
 include $(CLEAR_VARS)
 
@@ -95,7 +76,6 @@ LOCAL_CFLAGS := $(common_CFLAGS)
 LOCAL_MODULE := afl-tmin
 include $(BUILD_HOST_EXECUTABLE)
 
-#################################afl-analyze#################################
 
 include $(CLEAR_VARS)
 
@@ -111,7 +91,6 @@ LOCAL_CFLAGS := $(common_CFLAGS)
 LOCAL_MODULE := afl-analyze
 include $(BUILD_HOST_EXECUTABLE)
 
-#################################afl-gotcpu#################################
 
 include $(CLEAR_VARS)
 
@@ -127,7 +106,6 @@ LOCAL_CFLAGS := $(common_CFLAGS)
 LOCAL_MODULE := afl-gotcpu
 include $(BUILD_HOST_EXECUTABLE)
 
-#################################afl-clang-fast#################################
 
 include $(CLEAR_VARS)
 
@@ -138,7 +116,6 @@ LOCAL_MODULE := afl-clang-fast
 LOCAL_POST_INSTALL_CMD := $(hide) ln -sf afl-clang-fast $(BIN_PATH)/afl-clang-fast++;
 include $(BUILD_HOST_EXECUTABLE)
 
-#################################afl-llvm-pass.so#################################
 
 include $(CLEAR_VARS)
 LLVM_CONFIG := llvm-config
@@ -163,7 +140,6 @@ LOCAL_MODULE := afl-llvm-pass
 LOCAL_POST_INSTALL_CMD := $(hide) cp -f $(HOST_OUT)/lib64/afl-llvm-pass.so $(HELPER_PATH)/afl-llvm-pass.so;
 include $(BUILD_HOST_SHARED_LIBRARY)
 
-################################afl-llvm-rt#################################
 
 include $(CLEAR_VARS)
 
