@@ -20,6 +20,7 @@ cc_defaults {
 cc_binary {
   name: "afl-fuzz",
   static_executable: true,
+  host_supported: true,
 
   defaults: [
     "afl-defaults",
@@ -29,5 +30,137 @@ cc_binary {
     "afl-fuzz.c",
     "smart-chunks.c",
     "smart-utils.c",
+  ],
+}
+
+cc_binary {
+  name: "afl-showmap",
+  static_executable: true,
+  host_supported: true,
+
+  defaults: [
+    "afl-defaults",
+  ],
+
+  srcs: [
+    "afl-showmap.c",
+  ],
+}
+
+cc_binary {
+  name: "afl-tmin",
+  static_executable: true,
+  host_supported: true,
+
+  defaults: [
+    "afl-defaults",
+  ],
+
+  srcs: [
+    "afl-tmin.c",
+  ],
+}
+
+cc_binary {
+  name: "afl-analyze",
+  static_executable: true,
+  host_supported: true,
+
+  defaults: [
+    "afl-defaults",
+  ],
+
+  srcs: [
+    "afl-analyze.c",
+  ],
+}
+
+cc_binary {
+  name: "afl-gotcpu",
+  static_executable: true,
+  host_supported: true,
+
+  defaults: [
+    "afl-defaults",
+  ],
+
+  srcs: [
+    "afl-gotcpu.c",
+  ],
+}
+
+cc_binary_host {
+  name: "afl-clang-fast",
+  static_executable: true,
+
+  defaults: [
+    "afl-defaults",
+  ],
+
+  cflags: [
+    "-D__ANDROID__",
+    "-DAFL_PATH=\"out/host/linux-x86/lib64\"",
+  ],
+
+  srcs: [
+    "llvm_mode/afl-clang-fast.c",
+  ],
+}
+
+cc_binary_host {
+  name: "afl-clang-fast++",
+  static_executable: true,
+
+  defaults: [
+    "afl-defaults",
+  ],
+
+  cflags: [
+    "-D__ANDROID__",
+    "-DAFL_PATH=\"out/host/linux-x86/lib64\"",
+  ],
+
+  srcs: [
+    "llvm_mode/afl-clang-fast.c",
+  ],
+}
+
+cc_library_shared {
+  name: "libafl-llvm-rt",
+  compile_multilib: "both",
+
+  defaults: [
+    "afl-defaults",
+  ],
+
+  srcs: [
+    "llvm_mode/afl-llvm-rt.o.c",
+  ],
+}
+
+cc_library_shared {
+  name: "libafl-llvm-rt.vendor",
+  compile_multilib: "both",
+  proprietary: true,
+
+  defaults: [
+    "afl-defaults",
+  ],
+
+  srcs: [
+    "llvm_mode/afl-llvm-rt.o.c",
+  ],
+}
+
+cc_library_host_shared {
+  name: "afl-llvm-rt",
+  compile_multilib: "both",
+
+  defaults: [
+    "afl-defaults",
+  ],
+
+  srcs: [
+    "llvm_mode/afl-llvm-rt.o.c",
   ],
 }
