@@ -104,7 +104,8 @@ EXP_ST u8 *in_dir,                    /* Input directory with test cases  */
           *target_path,               /* Path to target binary            */
           *orig_cmdline,              /* Original command line            */
           *input_model_file,          /* Input model file                 */
-          *file_extension;            /* Extension of .cur_input          */
+          *file_extension,            /* Extension of .cur_input          */
+          *mount_path;                /* Android chroot mount path        */
 
 EXP_ST u32 exec_tmout = EXEC_TIMEOUT; /* Configurable exec timeout (ms)   */
 static u32 hang_tmout = EXEC_TIMEOUT; /* Timeout used for hang det (ms)   */
@@ -144,8 +145,9 @@ EXP_ST u8  skip_deterministic,        /* Skip deterministic stages?       */
            stacking_mutation_mode,    /* Stacking mutations, mixed normal and higher-order    */
                                       /* fuzzing mode                     */
            smart_log_mode,            /* Smart fuzzing log mode           */
-           smart_mutation_limit;      /* Limit the number of applications */
+           smart_mutation_limit,      /* Limit the number of applications */
                                       /* of smart fuzzing mode            */
+           chroot_mode;               /* Enable Linux chroot mode         */
 
 static s32 out_fd,                    /* Persistent fd for out_file       */
            dev_urandom_fd = -1,       /* Persistent fd for /dev/urandom   */
@@ -856,6 +858,18 @@ static void mark_as_redundant(struct queue_entry* q, u8 state) {
 
 }
 
+
+/* Function similar to Python's string.lstrip(x) */
+
+u8* lstrip(u8* s, u8* t) {
+    while (*s != 0 && *t != 0 && *s == *t) {
+        s++;
+        t++;
+    }
+    return s;
+}
+
+
 /* Add input structure information to the queue entry */
 
 static void update_input_structure(u8* fname, struct queue_entry* q) {
@@ -879,10 +893,37 @@ static void update_input_structure(u8* fname, struct queue_entry* q) {
       close(pipefd[0]);
       dup2(pipefd[1], STDOUT_FILENO);
       dup2(pipefd[1], STDERR_FILENO);
-      ifname = alloc_printf("-inputFilePath=%s", fname);
-      ofname = alloc_printf("-outputFilePath=%s/chunks/%s.repaired", out_dir,
+
+      if (chroot_mode) {
+        ifname = alloc_printf("-inputFilePath=%s", lstrip(fname, mount_path));
+        ofname = alloc_printf("-outputFilePath=%s/chunks/%s.repaired", lstrip(out_dir, mount_path),
                             basename(fname));
-      execlp("peach", "peach", "-1", ifname, ofname, input_model_file, (char*) NULL);
+
+        if (chdir(mount_path) != 0) {
+          PFATAL("Couldn't chdir into %s", mount_path);
+        }
+        if (chroot(mount_path) != 0) {
+          PFATAL("Couldn't chroot into %s", mount_path);
+        }
+
+        const char *env[] = {
+          "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/root/peach-3.0.202-source/output/linux_x86_64_debug/bin",
+          (char*) NULL
+        };
+        execle("/root/peach-3.0.202-source/output/linux_x86_64_debug/bin/peach",
+                "root/peach-3.0.202-source/output/linux_x86_64_debug/bin/peach",
+                "-1",
+                ifname,
+                ofname,
+                lstrip(input_model_file, mount_path),
+                (char*) NULL,
+                env);
+      } else {
+        ifname = alloc_printf("-inputFilePath=%s", fname);
+        ofname = alloc_printf("-outputFilePath=%s/chunks/%s.repaired", out_dir,
+                            basename(fname));
+        execlp("peach", "peach", "-1", ifname, ofname, input_model_file, (char*) NULL);
+      }
       exit(1); /* Stop the child process upon failure. */
     } else {
       close(pipefd[1]);
@@ -8177,6 +8218,7 @@ static void usage(u8* argv0) {
 
        "  -w model_type - type of input model - only peach is supported now \n"
        "  -g input_model- path to input model file \n"
+       "  -p mount_path - path to chroot\n"
        "  -h            - mix higher-order mutations with other mutations\n"
        "  -l            - log input model mutations in log/<pid>.log of the output directory\n"
        "  -H number     - Apply a maximum on the number of higher-order mutations\n\n"
@@ -8855,7 +8897,7 @@ int main(int argc, char** argv) {
   gettimeofday(&tv, &tz);
   srandom(tv.tv_sec ^ tv.tv_usec ^ getpid());
 
-  while ((opt = getopt(argc, argv, "+i:o:f:m:t:T:dnCB:S:M:x:Qw:g:lhH:e:")) > 0)
+  while ((opt = getopt(argc, argv, "+i:o:f:m:t:T:dnCB:S:M:x:Qw:p:g:lhH:e:")) > 0)
 
     switch (opt) {
 
@@ -9033,13 +9075,21 @@ int main(int argc, char** argv) {
 
         if (!stricmp(optarg, "peach")) {
           model_type = MODEL_PEACH;
-          if (!program_exist("peach")) {
-						FATAL("peach cannot be found. Please compile Peach and setup PATH environment variable correctly.");
-					}
+          if (!chroot_mode) {
+            if (!program_exist("peach")) {
+              FATAL("peach cannot be found. Please compile Peach and setup PATH environment variable correctly.");
+            }
+          }
 
         } else {
           PFATAL ("Unknown Input Model. Only Peach is supported now");
         }
+        break;
+
+      case 'p': /* Linux chroot mode */
+        if (chroot_mode) FATAL("Multiple -p options not supported");
+        chroot_mode = 1;
+        mount_path = optarg;
         break;
 
       case 'g':
